@@ -9,8 +9,8 @@ module.exports = function syncGithubIssuesToTodoistItems(options) {
     var todoistItemsPromise = todoistFetch({resource_types: ['items']}).then(function(result) { return result.items; });
 
     return Promise.all([githubIssuesPromise, todoistItemsPromise]).then(function(results) {
-        githubIssues = results[0];
-        todoistItems = results[1];
+        var githubIssues = results[0];
+        var todoistItems = results[1];
 
 
         for (var i = 0; i < githubIssues.length; i++) {
@@ -50,8 +50,8 @@ module.exports = function syncGithubIssuesToTodoistItems(options) {
 
         return todoistFetch({commands: commands});
     });
-}
+};
 
 function escapeRegExp(input) {
-    return input.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+    return input.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 }

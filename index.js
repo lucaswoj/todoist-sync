@@ -1,4 +1,3 @@
-var URL = require('url');
 var syncGithubIssuesToTodoistItems = require('./syncGithubIssuesToTodoistItems');
 
 syncGithubIssuesToTodoistItems({
@@ -13,14 +12,14 @@ syncGithubIssuesToTodoistItems({
             content: 'Review PR: ' + githubIssue.html_url,
             project_id: 181723478,
             checked: booleanToNumber(githubIssue.state !== 'open' || githubIssue.labels.find(function(label) {
-                return label.name === 'under construction'
+                return label.name === 'under construction';
             }))
-        }
+        };
     }
 
 })
-.then(function(output) { console.log(output) })
-.catch(function(error) { console.error(error.stack) });
+.then(function(output) { console.log(output); })
+.catch(function(error) { console.error(error.stack); });
 
 syncGithubIssuesToTodoistItems({
     githubQuery: 'is:issue assignee:lucaswoj user:mapbox',
@@ -29,11 +28,11 @@ syncGithubIssuesToTodoistItems({
             content: 'Resolve issue: ' + githubIssue.html_url,
             project_id: 181726274,
             checked: booleanToNumber(githubIssue.state !== 'open')
-        }
+        };
     }
 })
-.then(function(output) { console.log(output) })
-.catch(function(error) { console.error(error.stack) });
+.then(function(output) { console.log(output); })
+.catch(function(error) { console.error(error.stack); });
 
 syncGithubIssuesToTodoistItems({
     githubQuery: 'is:pr author:lucaswoj user:mapbox',
@@ -42,12 +41,12 @@ syncGithubIssuesToTodoistItems({
             content: 'Ship PR: ' + githubIssue.html_url,
             project_id: 181726274,
             checked: booleanToNumber(githubIssue.state !== 'open')
-        }
+        };
     }
 
 })
-.then(function(output) { console.log(output) })
-.catch(function(error) { console.error(error.stack) });
+.then(function(output) { console.log(output); })
+.catch(function(error) { console.error(error.stack); });
 
 function booleanToNumber(input) {
     return input ? 1 : 0;

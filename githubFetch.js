@@ -8,7 +8,7 @@ module.exports = function(urlPath, options) {
 
     return firstPagePromise.then(function(firstPage) {
         var pageCount = Math.ceil(firstPage.total_count / PER_PAGE);
-        var pagePromises = [firstPagePromise]
+        var pagePromises = [firstPagePromise];
         for (var i = 1; i < pageCount; i++) {
             pagePromises[i] = fetchPage(i);
         }
