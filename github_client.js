@@ -19,6 +19,7 @@ module.exports = {
         }).then(function(pages) {
             var items = [];
             for (var i = 0; i < pages.length; i++) {
+                if (pages[i].message) console.error(pages[i].message);
                 items = items.concat(pages[i].items);
             }
             return items;
@@ -31,7 +32,8 @@ module.exports = {
                     page: index + 1
                 }),
                 headers: Object.assign({}, options.headers, {
-                    Authentication: 'Basic ' + atob('lucaswoj:' + process.env.GITHUB_ACCESS_TOKEN)
+                    'Authorization': 'Basic ' + atob('lucaswoj:' + process.env.GITHUB_ACCESS_TOKEN),
+                    'User-Agent': 'lucaswoj'
                 })
             }));
         }

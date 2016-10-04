@@ -2,33 +2,32 @@ var fetchJSON = require('./fetch_json');
 
 module.exports = {
 
-    read: function(resourceTypes) {
-        return fetchJSON('https://todoist.com/API/v7/sync', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
-                'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
-            },
-            body: {
-                sync_token: '*',
-                resource_types: JSON.stringify(resourceTypes || ['all']),
-                token: process.env.TODOIST_ACCESS_TOKEN
-            }
-        });
-    },
+    commands: [],
 
-    write: function(commands) {
+    fetch: function(options) {
         return fetchJSON('https://todoist.com/API/v7/sync', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
                 'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
             },
-            body: {
-                commands: JSON.stringify(commands),
-                token: process.env.TODOIST_ACCESS_TOKEN
-            }
+            body: compactObject({
+                sync_token: '*',
+                token: process.env.TODOIST_ACCESS_TOKEN,
+                commands: JSON.stringify(options.commands),
+                resource_types: JSON.stringify(options.resource_types)
+            })
         });
     }
 
 };
+
+function compactObject(input) {
+    var output = {};
+    for (var key in input) {
+        if (input[key] != null) {
+            output[key] = input[key];
+        }
+    }
+    return output;
+}

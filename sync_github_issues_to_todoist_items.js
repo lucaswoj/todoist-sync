@@ -1,101 +1,52 @@
 var uuid = require('node-uuid');
-
-var linkPrefix = 'follows';
+var todoistClient = require('./todoist_client');
+var githubClient = require('./github_client');
 
 module.exports = function syncGithubIssuesToTodoistItems(options) {
 
-    var todoistClient = require('./todoist_client');
-    var todoistResourcesPromise = todoistClient.read(['notes', 'items']);
+    var commands = [];
+    var githubIssuesPromise = githubClient.fetch('/search/issues', {query: { q: options.githubQuery }});
+    var todoistItemsPromise = todoistClient.fetch({resource_types: ['items']}).then(function(result) { return result.items; });
 
-    var githubClient = require('./github_client');
-    var githubPRsPromise = githubClient.fetch('/search/issues', {query: { q: options.githubQuery }});
+    return Promise.all([githubIssuesPromise, todoistItemsPromise]).then(function(results) {
+        githubIssues = results[0];
+        todoistItems = results[1];
 
-    return Promise.all([githubPRsPromise, todoistResourcesPromise]).then(function(results) {
-        var githubPRs = results[0];
-        var todoistResources = results[1];
-        var todoistWriteCommands = [];
+        for (var i = 0; i < githubIssues.length; i++) {
+            var githubIssue = githubIssues[i];
+            var args = options.todoistItemArgs(githubIssue);
 
-        var lookup = createLookup(todoistResources.notes);
-
-        for (var i = 0; i < githubPRs.length; i++) {
-            var githubPR = githubPRs[i];
-
-            if (githubPR.state === 'open') {
-
-                if (lookup[githubPR.html_url]) {
-
-                    todoistWriteCommands.push({
-                        type: 'item_update',
-                        uuid: uuid.v4(),
-                        args: Object.assign({
-                            id: lookup[githubPR.html_url],
-                            checked: 0
-                        }, options.todoistItemArgs(githubPR))
-                    });
-
-                } else {
-                    var todoistItemId = uuid.v4();
-                    todoistWriteCommands.push({
-                        type: 'item_add',
-                        uuid: uuid.v4(),
-                        temp_id: todoistItemId,
-                        args: Object.assign({
-                            checked: 0
-                        }, options.todoistItemArgs(githubPR))
-                    });
-
-                    todoistWriteCommands.push({
-                        type: 'note_add',
-                        uuid: uuid.v4(),
-                        temp_id: uuid.v4(),
-                        args: {
-                            item_id: todoistItemId,
-                            content: linkPrefix + ' ' + githubPR.html_url
-                        }
-                    });
+            var matches = 0;
+            for (var j = 0; j < todoistItems.length; j++) {
+                var todoistItem = todoistItems[j];
+                if (todoistItem.content.includes(githubIssue.html_url)) {
+                    matches++;
+                    if (!args.checked) {
+                        commands.push({
+                            type: 'item_update',
+                            uuid: uuid.v4(),
+                            args: Object.assign({}, args, { id: todoistItem.id })
+                        });
+                    } else if (!todoistItem.checked) {
+                        commands.push({
+                            type: 'item_delete',
+                            uuid: uuid.v4(),
+                            args: { ids: [todoistItem.id] }
+                        });
+                    }
                 }
+            }
 
-            } else if (lookup[githubPR.html_url]) {
-
-                todoistWriteCommands.push({
-                    type: 'item_update',
+            if (!matches && !args.checked) {
+                commands.push({
+                    type: 'item_add',
                     uuid: uuid.v4(),
-                    args: Object.assign({
-                        id: lookup[githubPR.html_url],
-                        checked: 1
-                    })
+                    temp_id: uuid.v4(),
+                    args: args
                 });
             }
         }
 
-        return todoistClient.write(todoistWriteCommands);
+        return todoistClient.fetch({commands: commands});
     });
-}
-
-
-function createLookup(resources) {
-    var lookup = {};
-
-    for (var i = 0; i < resources.length; i++) {
-        var resource = resources[i];
-        var itemId = resource.item_id;
-
-        var regexp = new RegExp(linkPrefix + ' (https://github\.com/([^/]+)/([^/]+)/(pull|issues)/([0-9]+))', 'g');
-        var match;
-        while (match = regexp.exec(resource.content)) {
-            lookup[match[1]] = itemId;
-        } while (match);
-    }
-
-    return lookup;
-}
-
-
-
-function createTodoistIssue() {
-
-}
-
-function updateTodoistIssue() {
-
 }
