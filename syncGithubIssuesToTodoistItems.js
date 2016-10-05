@@ -12,7 +12,6 @@ module.exports = function syncGithubIssuesToTodoistItems(options) {
         var githubIssues = results[0];
         var todoistItems = results[1];
 
-
         for (var i = 0; i < githubIssues.length; i++) {
             var githubIssue = githubIssues[i];
             var args = options.todoistItemArgs(githubIssue);
@@ -24,19 +23,11 @@ module.exports = function syncGithubIssuesToTodoistItems(options) {
             });
 
             if (todoistItem) {
-                if (!args.checked && !todoistItem.is_deleted) {
-                    commands.push({
-                        type: 'item_update',
-                        uuid: uuid.v4(),
-                        args: Object.assign({}, args, { id: todoistItem.id })
-                    });
-                } else if (!todoistItem.checked && !todoistItem.is_deleted) {
-                    commands.push({
-                        type: 'item_delete',
-                        uuid: uuid.v4(),
-                        args: { ids: [todoistItem.id] }
-                    });
-                }
+                commands.push({
+                    type: 'item_update',
+                    uuid: uuid.v4(),
+                    args: Object.assign({}, args, { id: todoistItem.id })
+                });
 
             } else if (!args.checked) {
                 commands.push({
