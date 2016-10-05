@@ -1,5 +1,10 @@
 var syncGithubIssuesToTodoistItems = require('./syncGithubIssuesToTodoistItems');
 
+var afternoonLabel = 1268828;
+var morningLabel = 1268827;
+var mapboxReviewPRsProject = 181723478;
+var mapboxWriteCodeProject = 181726274;
+
 syncGithubIssuesToTodoistItems({
 
     githubQuery: (
@@ -10,9 +15,10 @@ syncGithubIssuesToTodoistItems({
     todoistItemArgs: function(githubIssue) {
         return {
             content: 'Review PR: ' + githubIssue.html_url,
-            project_id: 181723478,
-            checked: booleanToNumber(githubIssue.state !== 'open' || githubIssue.labels.find(function(label) {
-                return label.name === 'under construction';
+            project_id: mapboxReviewPRsProject,
+            labels: [morningLabel],
+            checked: booleanToNumber(githubIssue.state === 'closed' || githubIssue.labels.find(function(label) {
+                return label.name === 'under construction' || label.name === 'needs discussion';
             }))
         };
     }
@@ -26,8 +32,9 @@ syncGithubIssuesToTodoistItems({
     todoistItemArgs: function(githubIssue) {
         return {
             content: 'Resolve issue: ' + githubIssue.html_url,
-            project_id: 181726274,
-            checked: booleanToNumber(githubIssue.state !== 'open')
+            project_id: mapboxWriteCodeProject,
+            labels: [afternoonLabel],
+            checked: booleanToNumber(githubIssue.state === 'closed')
         };
     }
 })
@@ -39,8 +46,9 @@ syncGithubIssuesToTodoistItems({
     todoistItemArgs: function(githubIssue) {
         return {
             content: 'Ship PR: ' + githubIssue.html_url,
-            project_id: 181726274,
-            checked: booleanToNumber(githubIssue.state !== 'open')
+            project_id: mapboxWriteCodeProject,
+            labels: [afternoonLabel],
+            checked: booleanToNumber(githubIssue.state === 'closed')
         };
     }
 
