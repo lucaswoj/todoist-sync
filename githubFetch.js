@@ -1,13 +1,14 @@
 var fetchJSON = require('./fetchJSON');
 
 var PER_PAGE = 100;
+var MAX_SEARCH_ITEMS = 1000;
 
 module.exports = function(urlPath, options) {
 
     var firstPagePromise = fetchPage(0);
 
     return firstPagePromise.then(function(firstPage) {
-        var pageCount = Math.ceil(firstPage.total_count / PER_PAGE);
+        var pageCount = Math.ceil(Math.min(firstPage.total_count, MAX_SEARCH_ITEMS) / PER_PAGE);
         var pagePromises = [firstPagePromise];
         for (var i = 1; i < pageCount; i++) {
             pagePromises[i] = fetchPage(i);

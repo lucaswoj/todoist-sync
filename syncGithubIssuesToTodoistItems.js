@@ -6,21 +6,23 @@ module.exports = function syncGithubIssuesToTodoistItems(options) {
 
     var commands = [];
     var githubIssuesPromise = githubFetch('/search/issues', {query: { q: options.githubQuery }});
-    var todoistItemsPromise = todoistFetch({resource_types: ['items']}).then(function(result) { return result.items; });
+    var todoistResourcesPromise = todoistFetch({resource_types: ['items']}).then(function(result) { return result; });
 
-    return Promise.all([githubIssuesPromise, todoistItemsPromise]).then(function(results) {
+    return Promise.all([githubIssuesPromise, todoistResourcesPromise]).then(function(results) {
         var githubIssues = results[0];
-        var todoistItems = results[1];
+        var todoistResources = results[1];
+        var todoistItems = todoistResources.items;
 
         for (var i = 0; i < githubIssues.length; i++) {
             var githubIssue = githubIssues[i];
-            var args = options.todoistItemArgs(githubIssue);
 
             var regexp = new RegExp('\\b' + escapeRegExp(githubIssue.html_url) + '\\b');
 
             var todoistItem = todoistItems.find(function(todoistItem) {
                 return todoistItem.content.match(regexp);
             });
+
+            var args = options.todoistItemArgs(githubIssue, todoistItem);
 
             if (todoistItem) {
                 commands.push({
@@ -34,7 +36,7 @@ module.exports = function syncGithubIssuesToTodoistItems(options) {
                     type: 'item_add',
                     uuid: uuid.v4(),
                     temp_id: uuid.v4(),
-                    args: args
+                    args: Object.assign(args, options.newTodoistItemArgs && options.newTodoistItemArgs(githubIssue))
                 });
             }
         }
