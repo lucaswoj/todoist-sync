@@ -31,7 +31,7 @@ module.exports = function syncGithubIssuesToTodoistItems(options) {
                     args: Object.assign({}, args, { id: todoistItem.id })
                 });
 
-            } else if (!args.checked) {
+            } else if (!args.checked && !args.in_history) {
                 commands.push({
                     type: 'item_add',
                     uuid: uuid.v4(),

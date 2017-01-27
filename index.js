@@ -9,7 +9,7 @@ var blockedLabel = 1269275;
 
 function githubIssueHasLabel(githubIssue, labelName) {
     return githubIssue.labels.some(function(label) {
-        return label.name === labelName;
+        return label.name.includes(labelName);
     });
 }
 
@@ -19,11 +19,10 @@ syncGithubIssuesToTodoistItems({
         'repo:mapbox/mapbox-gl-function repo:mapbox/mapbox-gl-style-spec'
     ),
     todoistItemArgs: function(githubIssue, todoistItem) {
-        var isBlocked = githubIssueHasLabel(githubIssue, 'not ready for review') || githubIssueHasLabel(githubIssue, 'needs discussion');
+        var isBlocked = githubIssueHasLabel(githubIssue, 'needs') || githubIssueHasLabel(githubIssue, 'under ') || githubIssueHasLabel(githubIssue, 'not ready');
         return {
-            labels: arrayValueToggle(todoistItem && todoistItem.labels || [], blockedLabel, isBlocked),
             content: 'Review PR: ' + githubIssue.html_url,
-            checked: booleanToNumber(githubIssue.state === 'closed')
+            in_history: booleanToNumber(githubIssue.state === 'closed' || isBlocked)
         };
     },
     newTodoistItemArgs: function(githubIssue) {
@@ -40,13 +39,13 @@ syncGithubIssuesToTodoistItems({
     githubQuery: 'is:issue assignee:lucaswoj user:mapbox',
     todoistItemArgs: function(githubIssue) {
         return {
-            labels: [afternoonLabel],
             content: 'Resolve issue: ' + githubIssue.html_url,
-            checked: booleanToNumber(githubIssue.state === 'closed')
+            in_history: booleanToNumber(githubIssue.state === 'closed')
         };
     },
     newTodoistItemArgs: function(githubIssue) {
         return {
+            labels: [afternoonLabel],
             project_id: mapboxProject
         }
     }
@@ -55,16 +54,16 @@ syncGithubIssuesToTodoistItems({
 .catch(function(error) { console.error(error.stack); });
 
 syncGithubIssuesToTodoistItems({
-    githubQuery: 'is:pr author:lucaswoj user:mapbox no:assignee',
+    githubQuery: 'is:pr author:lucaswoj user:mapbox',
     todoistItemArgs: function(githubIssue) {
         return {
-            labels: [afternoonLabel],
             content: 'Ship PR: ' + githubIssue.html_url,
-            checked: booleanToNumber(githubIssue.state === 'closed')
+            in_history: booleanToNumber(githubIssue.state === 'closed')
         };
     },
     newTodoistItemArgs: function(githubIssue) {
         return {
+            labels: [afternoonLabel],
             project_id: mapboxProject
         }
     }

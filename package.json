@@ -1,0 +1,19 @@
+{
+  "name": "todoist-sync",
+  "version": "1.0.0",
+  "description": "Syncs todoist with other services",
+  "main": "index.js",
+  "dependencies": {
+    "node-fetch": "^1.6.3",
+    "node-uuid": "^1.4.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "bin": {
+    "todoist-sync": "./index.js"
+  }
+}
