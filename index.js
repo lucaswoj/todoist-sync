@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
 var syncGithubIssuesToTodoistItems = require('./syncGithubIssuesToTodoistItems');
-var mapboxProject = 181723387;
 
-var afternoonLabel = 1269254;
-var morningLabel = 1269253;
-var blockedLabel = 1269275;
+var mapboxProject = 181723387;
+var deepWorkLabel = 1269254;
 
 function githubIssueHasLabel(githubIssue, labelName) {
     return githubIssue.labels.some(function(label) {
@@ -14,21 +12,18 @@ function githubIssueHasLabel(githubIssue, labelName) {
 }
 
 syncGithubIssuesToTodoistItems({
-    githubQuery: (
-        'is:pr -author:lucaswoj repo:mapbox/mapbox-gl-js ' +
-        'repo:mapbox/mapbox-gl-function repo:mapbox/mapbox-gl-style-spec'
-    ),
+    githubQuery: 'is:pr -author:lucaswoj repo:mapbox/mapbox-gl-js',
     todoistItemArgs: function(githubIssue) {
-        var isBlocked = githubIssueHasLabel(githubIssue, 'needs') || githubIssueHasLabel(githubIssue, 'under ') || githubIssueHasLabel(githubIssue, 'not ready');
+        var isBlocked = githubIssueHasLabel(githubIssue, 'under development')
         return {
             content: 'Review PR: ' + githubIssue.html_url,
-            in_history: booleanToNumber(githubIssue.state === 'closed' || isBlocked)
+            in_history: booleanToNumber(githubIssue.state === 'closed' || isBlocked),
+            priority: 2
         };
     },
     newTodoistItemArgs: function(githubIssue) {
         return {
-            project_id: mapboxProject,
-            labels: [morningLabel]
+            project_id: mapboxProject
         }
     }
 })
@@ -45,7 +40,7 @@ syncGithubIssuesToTodoistItems({
     },
     newTodoistItemArgs: function(githubIssue) {
         return {
-            labels: [afternoonLabel],
+            labels: [deepWorkLabel],
             project_id: mapboxProject
         }
     }
@@ -63,7 +58,7 @@ syncGithubIssuesToTodoistItems({
     },
     newTodoistItemArgs: function(githubIssue) {
         return {
-            labels: [afternoonLabel],
+            labels: [deepWorkLabel],
             project_id: mapboxProject
         }
     }
@@ -73,16 +68,4 @@ syncGithubIssuesToTodoistItems({
 
 function booleanToNumber(input) {
     return input ? 1 : 0;
-}
-
-function arrayValueToggle(array, value, toggle) {
-    var index = array.indexOf(value);
-
-    if (toggle && index === -1) {
-        array.push(value);
-    } else if (!toggle && index !== -1) {
-        array.splice(index, 1);
-    }
-
-    return array;
 }
