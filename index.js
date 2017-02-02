@@ -5,19 +5,12 @@ var syncGithubIssuesToTodoistItems = require('./syncGithubIssuesToTodoistItems')
 var mapboxProject = 181723387;
 var deepWorkLabel = 1269254;
 
-function githubIssueHasLabel(githubIssue, labelName) {
-    return githubIssue.labels.some(function(label) {
-        return label.name.includes(labelName);
-    });
-}
-
 syncGithubIssuesToTodoistItems({
     githubQuery: 'is:pr -author:lucaswoj repo:mapbox/mapbox-gl-js',
     todoistItemArgs: function(githubIssue) {
-        var isBlocked = githubIssueHasLabel(githubIssue, 'under development')
         return {
             content: 'Review PR: ' + githubIssue.html_url,
-            in_history: booleanToNumber(githubIssue.state === 'closed' || isBlocked),
+            in_history: booleanToNumber(githubIssue.state === 'closed' || githubIssue.labels.some((label) => label.name === 'under development')),
             priority: 2
         };
     },
