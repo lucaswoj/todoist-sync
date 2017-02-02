@@ -18,7 +18,7 @@ syncGithubIssuesToTodoistItems({
         'is:pr -author:lucaswoj repo:mapbox/mapbox-gl-js ' +
         'repo:mapbox/mapbox-gl-function repo:mapbox/mapbox-gl-style-spec'
     ),
-    todoistItemArgs: function(githubIssue, todoistItem) {
+    todoistItemArgs: function(githubIssue) {
         var isBlocked = githubIssueHasLabel(githubIssue, 'needs') || githubIssueHasLabel(githubIssue, 'under ') || githubIssueHasLabel(githubIssue, 'not ready');
         return {
             content: 'Review PR: ' + githubIssue.html_url,

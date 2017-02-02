@@ -22,7 +22,7 @@ module.exports = function syncGithubIssuesToTodoistItems(options) {
                 return todoistItem.content.match(regexp);
             });
 
-            var args = options.todoistItemArgs(githubIssue, todoistItem);
+            var args = options.todoistItemArgs(githubIssue);
 
             if (todoistItem) {
                 commands.push({
